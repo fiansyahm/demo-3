@@ -1,0 +1,16 @@
+HTTP/1.1 302 Found
+Server: nginx
+Date: Tue, 15 Mar 2022 23:23:01 GMT
+Content-Type: text/html; charset=iso-8859-1
+Content-Length: 281
+Connection: keep-alive
+Location: https://subakti.com/wp-content/uploads/2022-03-02-MM-Irfan-Subakti-IF184605-FRAMEPRO-C-Quiz-1.pdf
+
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN">
+<html><head>
+<title>302 Found</title>
+</head><body>
+<h1>Found</h1>
+<p>The document has moved <a href="https://subakti.com/wp-content/uploads/2022-03-02-MM-Irfan-Subakti-IF184605-FRAMEPRO-C-Quiz-1.pdf">here</a>.</p>
+</body></html>
+nt/uploads/2022-03-02-MM-Irfan-Subakti-IF18460

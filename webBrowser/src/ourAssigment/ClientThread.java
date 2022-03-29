@@ -118,6 +118,8 @@ public class ClientThread extends Thread{
 				File f = new File("D:\\serverku\\File\\"+filetmp);
 	            BufferedWriter gambar = new BufferedWriter(new FileWriter(f));
 
+	            String header="HTTP/1.0 206 Partial Content\r\nContent-Type: html\r\nContent-length: "+"fileContent.length()"+"\r\nContent-Range: bytes "+"RANGE"+"\r\n\r\n"+"fileContent";
+	            
 	            bw.write(folderlisttmp);
 //	            System.out.println(newfileContent);
 	            bw.flush();
@@ -125,6 +127,10 @@ public class ClientThread extends Thread{
 	            System.out.println("berhasil 3");
 //				continue;
 			    }
+			    String cekalive=br.readLine();
+				if(cekalive.indexOf("connection: keep-alive")>=0) keepalive=1;
+			    
+				
 			}
 			else if(message.split(" ")[1].substring(1).indexOf(".")<0) {
 
@@ -177,6 +183,8 @@ public class ClientThread extends Thread{
 				bw.write(inputan);
 				bw.flush();	
 				System.out.println("4");
+				String cekalive=br.readLine();
+				if(cekalive.indexOf("connection: keep-alive")>=0) keepalive=1;
 //				client.close();
 //				continue;
 
@@ -217,7 +225,7 @@ public class ClientThread extends Thread{
 					System.out.println(message);
 					message=br.readLine();
 					
-					if(message.indexOf("Connection: keep-alive")>=0) keepalive=1;
+					if(message.indexOf("connection: keep-alive")>=0) keepalive=1;
 				}
 				
 				
@@ -227,11 +235,12 @@ public class ClientThread extends Thread{
 				folderlisttmp=inputan;
 				bw.write(inputan);
 				bw.flush();
-				if(keepalive==1)System.out.println("keep alive start");func(server,configArr,websiteRoot,client);
+				
 //				client.close();
 
 			}
 			System.out.println("4");
+			if(keepalive==1) {System.out.println("keep alive start");func(server,configArr,websiteRoot,client);}
 			client.close();
 			
 			} catch (IOException e1) {
@@ -249,6 +258,46 @@ public class ClientThread extends Thread{
 		this.configArr=configArr;
 	}
 	
+	
+	public void funcfirst() {
+		try {
+			BufferedReader br= new BufferedReader(new InputStreamReader(client.getInputStream()));
+			BufferedWriter bw=new BufferedWriter(new OutputStreamWriter(client.getOutputStream()));
+			System.out.println("3");
+			String message=br.readLine();
+			System.out.println(message);
+			String urn=message.split(" ")[1];
+			
+			urn=urn.substring(1);
+
+			String fileContent;
+			String statuscode;
+			FileInputStream fis;
+			
+			fis=new FileInputStream(websiteRoot+urn);
+			fileContent=new String(fis.readAllBytes());
+			statuscode="200 OK";
+			System.out.println(fileContent);
+
+
+			while(!message.isEmpty()) {
+				System.out.println(message);
+				message=br.readLine();
+			}
+			System.out.println("4");
+			System.out.println("From client: "+message);
+			String inputan="HTTP/1.0 200 OK\r\nContent-Type: html\r\nContent-length: "+fileContent.length()+"\r\n\r\n"+fileContent;
+
+			bw.write(inputan);
+			bw.flush();	
+			client.close();
+		
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
 	@Override
 	public void run() {
 		//			String websiteRoot="D:\\";
@@ -257,42 +306,7 @@ public class ClientThread extends Thread{
 		while(true) {
 //				Socket client=server.accept();
 //				System.out.println("2");				
-//				try {
-//					BufferedReader br= new BufferedReader(new InputStreamReader(client.getInputStream()));
-//					BufferedWriter bw=new BufferedWriter(new OutputStreamWriter(client.getOutputStream()));
-//					System.out.println("3");
-//					String message=br.readLine();
-//					System.out.println(message);
-//					String urn=message.split(" ")[1];
-//					
-//					urn=urn.substring(1);
-//	 
-//					String fileContent;
-//					String statuscode;
-//					FileInputStream fis;
-//					
-//					fis=new FileInputStream(websiteRoot+urn);
-//					fileContent=new String(fis.readAllBytes());
-//					statuscode="200 OK";
-//					System.out.println(fileContent);
-//	 
-//	 
-//					while(!message.isEmpty()) {
-//						System.out.println(message);
-//						message=br.readLine();
-//					}
-//					System.out.println("4");
-//					System.out.println("From client: "+message);
-//					String inputan="HTTP/1.0 200 OK\r\nContent-Type: html\r\nContent-length: "+fileContent.length()+"\r\n\r\n"+fileContent;
-//	 
-//					bw.write(inputan);
-//					bw.flush();	
-//					client.close();
-//				
-//				} catch (IOException e) {
-//					// TODO Auto-generated catch block
-//					e.printStackTrace();
-//				}
+//			funcfirst();
 				
 			func(server,configArr,websiteRoot,client);
 		}

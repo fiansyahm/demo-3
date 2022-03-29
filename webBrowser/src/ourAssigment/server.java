@@ -28,16 +28,17 @@ public class server {
 	}
  	
 
-	 public static void func(ServerSocket server,String[] configArr,String websiteRoot) {
+	 public static void func(Socket client,String[] configArr,String websiteRoot) {
 		
 		String pertama=null;
 		String folderlisttmp="fileberhasildidownload";
 		int count=0;
 		String message;
 		int keepalive=0;
-		Socket client;
+		
+		System.out.println("1x1x");
 		try {
-			client = server.accept();
+			
 		
 		System.out.println("2");
 
@@ -129,6 +130,9 @@ public class server {
             System.out.println("berhasil 3");
 //			continue;
 		    }
+		    
+		    String cekalive=br.readLine();
+			if(cekalive.indexOf("connection: keep-alive")>=0) keepalive=1;
 		}
 		else if(message.split(" ")[1].substring(1).indexOf(".")<0) {
 
@@ -181,6 +185,8 @@ public class server {
 			bw.write(inputan);
 			bw.flush();	
 			System.out.println("4");
+			String cekalive=br.readLine();
+			if(cekalive.indexOf("connection: keep-alive")>=0) keepalive=1;
 //			client.close();
 //			continue;
 
@@ -209,7 +215,7 @@ public class server {
 			else if(url.indexOf("progjarkutercinta.com")>=0)websiteRoot=configArr[7];
 
 			urn=urn.substring(1);
-			System.out.println("dirnya"+websiteRoot+urn);
+			System.out.println("dirnya last12: "+websiteRoot+urn);
 
 
 			FileInputStream fis=new FileInputStream(websiteRoot+urn);
@@ -217,33 +223,34 @@ public class server {
 			System.out.println(fileContent);
 
 
+			System.out.println("-x-x-x-");
 			while(!message.isEmpty()) {
 				System.out.println(message);
 				message=br.readLine();
 				
-				if(message.indexOf("Connection: keep-alive")>=0) keepalive=1;
+				if(message.indexOf("connection: keep-alive")>=0) keepalive=1;
 			}
-			
+			System.out.println("close client 1");
 			
 //			System.out.println("4");
 //				System.out.println("From client: "+message);
 			String inputan="HTTP/1.0 200 OK\r\nContent-Type: html\r\nContent-length: "+fileContent.length()+"\r\n\r\n"+fileContent;
+//			if(keepalive==1)System.out.println("keep alive start");
 			folderlisttmp=inputan;
 			bw.write(inputan);
 			bw.flush();
-			if(keepalive==1)System.out.println("keep alive start");func(server,configArr,websiteRoot);
 //			client.close();
 
 
-
-
 		}
+		if(keepalive==1) {System.out.println("keep alive start");func(client,configArr,websiteRoot);}
 		System.out.println("4");
 		client.close();
 		
 		} catch (IOException e1) {
 			// TODO Auto-generated catch block
-			e1.printStackTrace();
+//			e1.printStackTrace();
+			System.out.println("ERROR");
 		}
 	}
 	
@@ -264,9 +271,11 @@ public class server {
 			ServerSocket server=new ServerSocket(Integer.valueOf(configArr[3]),5,addr);
 			
 			System.out.println("1");
+			Socket client;
 			
 			while(true) {
-				func(server,configArr,websiteRoot);
+				client = server.accept();
+				func(client,configArr,websiteRoot);
  
 			}	
 			
