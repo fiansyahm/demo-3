@@ -1,6 +1,7 @@
 package ourAssigment;
  
 import java.awt.image.BufferedImage;
+import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -9,6 +10,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.io.PrintStream;
 import java.lang.System.Logger;
 import java.lang.System.Logger.Level;
 import java.net.InetAddress;
@@ -17,12 +19,31 @@ import java.net.Socket;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import javax.imageio.ImageIO;
  
 public class server {
+	public static void transfer(final File f, Socket socket,FileInputStream fis) throws IOException {		
+		String fileContent=new String(fis.readAllBytes());
+		
+		String header="HTTP/1.0 206 Partial Content\r\nContent-Type: application/jpg"+"\r\nContent-length: "+fileContent.length()+"\r\nContent-Range: bytes "+"0-"+(fileContent.length()-1)+"/"+fileContent.length()+"\r\n\r\n";
+	    
+		System.out.println("-----------------------");
+		System.out.println(header);
+		final PrintStream outStream = new PrintStream(socket.getOutputStream());
+	    final BufferedInputStream inStream = new BufferedInputStream(new FileInputStream(f));
+	    final byte[] buffer = new byte[4096];
+	    outStream.print(header);
+	    for (int read = inStream.read(buffer); read >= 0; read = inStream.read(buffer))
+	        outStream.write(buffer, 0, read);
+	    inStream.close();
+	    outStream.close();
+	}
+	
+	
 	public static void main(String[] args) throws IOException {
 		soal_all();
 	}
@@ -111,7 +132,8 @@ public class server {
 		    }catch(IOException e){
 		      System.out.println("Error: "+e);
 		    }
-		    bw.write(folderlisttmp);
+		    transfer(fi, client,newfis);
+//		    bw.write(folderlisttmp);
 		    bw.flush();
 		    System.out.println("berhasil 3");
 //		    continue;
@@ -122,8 +144,8 @@ public class server {
 
 			File f = new File("D:\\serverku\\File\\"+filetmp);
             BufferedWriter gambar = new BufferedWriter(new FileWriter(f));
-
-            bw.write(folderlisttmp);
+            transfer(fi, client,newfis);
+//            bw.write(folderlisttmp);
 //            System.out.println(newfileContent);
             bw.flush();
 //            client.close();
@@ -137,7 +159,7 @@ public class server {
 		else if(message.split(" ")[1].substring(1).indexOf(".")<0) {
 
 //			no 2
-			String baru = null,tmp=null;
+			String baru = "<table><tr><th>Name</th><th>Size</th><th>Last Modified</th></tr>",tmp=null;
 			try {
 
 				  String dirLocation=null;
@@ -155,6 +177,7 @@ public class server {
 			            .map(Path::toFile)
 			            .collect(Collectors.toList());
 
+			      SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
 			      for(int i=0;i<myfile.size();i++) {
 			    	  tmp=myfile.get(i).toString();
 //			    	  System.out.println(tmp);
@@ -162,8 +185,10 @@ public class server {
 			    	  String[] listtmp=tmp.split(" ");
 			    	  tmp=listtmp[listtmp.length-1];
 			    	  System.out.println(tmp);
-			    	  baru="<a href=\"/" + tmp + "\">"+tmp+"</a><br>"+baru;
+//			    	  baru="<a href=\"/" + tmp + "\">"+tmp+"</a><br>"+baru;
+			    	  baru=baru+"<tr><td>"+ "<a href=\"/" + tmp + "\">"+tmp+"</a>"+ "</td><td>"+myfile.get(i).length()+"</td><td>"+sdf.format(myfile.get(i).lastModified())+"</td></tr>";
 			      }
+			      baru=baru+"</table>";
 
 			      if(myfile.size()<=0) {
 			    	  bw.flush();
